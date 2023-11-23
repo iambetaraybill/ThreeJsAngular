@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "Messi3D": {
+    "ThreeJsAngular": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -13,7 +13,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/messi3-d",
+            "outputPath": "dist/three-js-angular",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
@@ -21,7 +21,6 @@
             ],
             "tsConfig": "tsconfig.app.json",
             "assets": [
-              "src/favicon.ico",
               "src/assets"
             ],
             "styles": [
@@ -57,10 +56,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "Messi3D:build:production"
+              "buildTarget": "ThreeJsAngular:build:production"
             },
             "development": {
-              "buildTarget": "Messi3D:build:development"
+              "buildTarget": "ThreeJsAngular:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -68,7 +67,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "buildTarget": "Messi3D:build"
+            "buildTarget": "ThreeJsAngular:build"
           }
         },
         "test": {
@@ -80,7 +79,6 @@
             ],
             "tsConfig": "tsconfig.spec.json",
             "assets": [
-              "src/favicon.ico",
               "src/assets"
             ],
             "styles": [
