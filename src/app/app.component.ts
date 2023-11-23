@@ -1,6 +1,7 @@
 import { Component, HostListener, OnInit } from '@angular/core';
 import * as THREE from 'three';
-import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
+import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { SharedModule } from './shared.module';
 
 @Component({
@@ -14,30 +15,35 @@ export class AppComponent implements OnInit {
 
   //Scene
   scene: THREE.Scene = new THREE.Scene();
+  //Mesh ******** Here i used neymar ******************
 
-  //Mesh
-  // geometry: THREE.BoxGeometry = new THREE.BoxGeometry(1, 1, 1);
-  // material: THREE.MeshBasicMaterial = new THREE.MeshBasicMaterial({ color: 'yellow' });
-  // mesh: THREE.Mesh<THREE.BoxGeometry, THREE.MeshBasicMaterial, THREE.Object3DEventMap> = new THREE.Mesh(this.geometry, this.material);
-  //******** Here i used sample skull mesh ******************
+  // group?: THREE.Group;
 
   //Camera
   aspect: { width: number, height: number } = { width: window.innerWidth, height: window.innerHeight };
-  camera: THREE.PerspectiveCamera = new THREE.PerspectiveCamera(80, this.aspect.width / this.aspect.height);
+  camera: THREE.PerspectiveCamera = new THREE.PerspectiveCamera(85, this.aspect.width / this.aspect.height);
 
   //Renderer
-  canvas?: HTMLCanvasElement | THREE.OffscreenCanvas = undefined;
-  renderer?: THREE.WebGLRenderer = undefined;
+  canvas?: HTMLCanvasElement | THREE.OffscreenCanvas;
+  renderer?: THREE.WebGLRenderer;
 
   //Clock
   clock: THREE.Clock = new THREE.Clock();
 
   //Loader
-  loader = new OBJLoader();
+  loader = new FBXLoader();
+  // textureLoader = new THREE.TextureLoader();
 
   //Lights
   ambientLight = new THREE.AmbientLight(0xffffff);
   directionalLight = new THREE.DirectionalLight(0xffffff);
+
+  //Orbit Controls
+  controls?: OrbitControls;
+  mixer? : any;
+  clipAction? : any;
+  // cursor
+  // cursor: { x: number, y: number } = { x: 0, y: 0 };
 
   ngOnInit(): void {
     this.initCanvasRenderer();
@@ -58,33 +64,46 @@ export class AppComponent implements OnInit {
     this.renderer?.setSize(this.aspect.width, this.aspect.height);
     this.renderer?.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   }
-
+  // @HostListener('window:mousemove', ['$event'])
+  // onMousemove(event: any) {
+  //   //change aspect 
+  //   this.cursor.x = event.clientX / window.innerWidth - 0.5;
+  //   this.cursor.y = event.clientY / window.innerHeight - 0.5;
+  // }
   initCanvasRenderer() {
     this.canvas = document.getElementsByClassName('draw')[0];
     this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas })
     this.renderer?.setSize(this.aspect.width, this.aspect.height);
     this.renderer?.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+    this.controls.enableRotate = false;
+    this.controls.enableZoom = false;
   }
   addLights() {
     this.directionalLight.position.z = 2;
     this.scene.add(this.ambientLight, this.directionalLight);
   }
   addElementsToScene() {
-
-    this.loader.load("../assets/models/skull.obj", (obj: any) => {
-      obj.position.x = -1.5;
-      obj.position.y = 0;
-      obj.position.z = 0;
-      obj.rotation.y = 1.5;
-      obj.children[0].material = new THREE.MeshNormalMaterial();
-      obj.children[1].material = new THREE.MeshNormalMaterial();
+    this.loader.load("../assets/models/sambaDancing.fbx", (obj: any) => {
+      const helper = new THREE.CameraHelper(this.camera);
+      this.scene.add(this.camera);
+      // this.scene.add(helper);
+      this.camera.position.x = obj?.position.x ?? 0;
+      this.camera.position.y = obj?.position.y ?? 0;
+      this.camera.position.z = obj?.position.z ?? 0;
+      this.camera.position.z = 1.9;
+      this.camera.position.y = 0.4;
+      this.mixer = new THREE.AnimationMixer( obj );
+      this.clipAction = this.mixer?.clipAction(obj.animations[0]);
+      this.clipAction?.play();
       this.scene.add(obj);
+      console.log(obj)
+      obj?.position.setY(-1)
     });
-    this.scene.add(this.camera);
-    this.camera.position.z = 2;
   }
   renderAnimation() {
-    // this.mesh.rotation.x = -this.clock.getElapsedTime();
+    this.controls?.update();
+    this.mixer?.update(this.clock.getDelta());
     this.renderer?.render(this.scene, this.camera);
     window.requestAnimationFrame(this.renderAnimation.bind(this));
   }
